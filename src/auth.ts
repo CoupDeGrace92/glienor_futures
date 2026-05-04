@@ -8,7 +8,11 @@ import { date } from "drizzle-orm/mysql-core";
 
 export function HashPassword(password: string): Promise<string> {
     return hash(password);
-}
+};
+
+export function CheckPassHash(password: string, hash: string): Promise<boolean> {
+    return verify(hash, password);
+};
 
 export function MakeJWT(userID: string, expiresIn: number, secret: string): string {
     type payload = Pick<JwtPayload, "iss"|"sub"|"iat"|"exp">;
@@ -43,3 +47,7 @@ export function GetAuthToken(req: Request): string {
     const out = authToken.split(" ");
     return out[1];
 }
+
+export function MakeRefreshToken(): string {
+    return randomBytes(256).toString("hex");
+};
