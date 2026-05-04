@@ -20,7 +20,8 @@ const PORT = 8080;
 
 app.use(express.json());
 
-app.get("/api/health", HandlerReadiness)
+app.get("/api/health", HandlerReadiness);
+app.post("/admin/reset", HandlerReset);
 
 app.use(ErrorHandler);
 
