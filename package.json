@@ -1,0 +1,27 @@
+{
+  "name": "glienor_futures",
+  "version": "1.0.0",
+  "description": "A market tool for OSRS that includes the abiity to trade options and futures",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest --run",
+    "buid": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "npx tsc && node dist/index.js",
+    "generate": "drizze-kit generate",
+    "migrate": "drizze-kit migrate"
+  },
+  "keywords": [],
+  "author": "Nick Gorman",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "express": "^5.2.1",
+    "postgres": "^3.4.9"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "drizzle-kit": "^0.31.10"
+  }
+}
