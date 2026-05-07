@@ -17,13 +17,11 @@ console.log(data)
 //The data population script - should get the most recent data endpoint once every 10 minutes
 //if the updated value is more recent than our db value, populate our db with the new data
 import { MarketClient } from "./market_client.js";
-const client = new MarketClient("glienor futures admin");
-const data = await client.getItemLatest("abyssal whip");
-if ("success" in data && !data.success) {
-    console.error("API returned an error: ", data.error);
+const popClient = new MarketClient("glienor futures data fetcher");
+const d = await popClient.getAllItems();
+if ("success" in d && !d.success) {
+    console.error("API returned an error: ", d.error);
 }
 else {
-    for (const [name, item] of Object.entries(data)) {
-        console.log(`${name} has a price of ${item.price} with a traded volume ${item.volume}`);
-    }
+    console.log(d);
 }

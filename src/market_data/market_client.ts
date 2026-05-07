@@ -27,8 +27,11 @@ export class MarketClient {
     }
 
     private async fetchJSON<T>(path: string, queries?: Record<string, string>): Promise<T> {
-        let url = new URL(path, this.baseUrl);
-        
+        const url = path.startsWith("http")
+            ? new URL(path)
+            : new URL(path, this.baseUrl);
+        //The above allows us to specify full urls that are not our basepaths for methods
+
         if (queries) {
             for (const [key, value] of Object.entries(queries)) {
                 url.searchParams.append(key, value);
@@ -59,4 +62,21 @@ export class MarketClient {
     async getItemLatest(name: string): Promise<MarketResponse> {
         return this.fetchJSON<MarketResponse>("/exchange/history/osrs/latest", {name: name})
     };
+
+    async getAllItems(): Promise<DumpData> {
+        return this.fetchJSON<any>("https://chisel.weirdgloop.org/gazproj/gazbot/os_dump.json");
+    };
+};
+
+export type DumpData = Record<string, DumpInfo | number> | MarketError;
+
+export type DumpInfo = {
+    name: string,
+    examine: string,
+    id: number,
+    members: boolean,
+    icon: string,
+    price: number,
+    last: number,
+    volume: number,
 };
