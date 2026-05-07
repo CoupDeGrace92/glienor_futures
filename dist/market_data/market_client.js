@@ -41,5 +41,6 @@ export class MarketClient {
     async getAllItems() {
         return this.fetchJSON("https://chisel.weirdgloop.org/gazproj/gazbot/os_dump.json");
     }
+    ;
 }
 ;

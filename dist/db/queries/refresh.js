@@ -16,3 +16,4 @@ export async function GetUserFromRefreshToken(token) {
         .where(eq(refresh.token, token));
     return result;
 }
+;

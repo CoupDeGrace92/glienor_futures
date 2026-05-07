@@ -26,14 +26,17 @@ import { db } from "../db/index.js";
 
 const popClient = new MarketClient("glienor futures data fetcher");
 const data= await popClient.getAllItems();
-let {timestamp: storedTimestamp} = await GetLastUpdateTimestamp();
-if (storedTimestamp === null) {
+let timestampObj = await GetLastUpdateTimestamp();
+let storedTimestamp: Date
+if (timestampObj == null || timestampObj.timestamp == null) {
     const fetchedTimestamp = await popClient.getLastUpdate()
     const time = new Date(fetchedTimestamp.osrs)
     if (isNaN(time.getTime())) {
         throw new Error(`Invalid upstream timestamp: ${fetchedTimestamp.osrs}`);
     }
     storedTimestamp = time
+} else {
+    storedTimestamp = timestampObj.timestamp
 }
 
 console.log(storedTimestamp)
