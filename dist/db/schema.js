@@ -15,19 +15,26 @@ export const refresh = pgTable("refresh", {
     expiresAt: timestamp("expires_at").notNull(),
     revoked: boolean("revoked").notNull().default(false)
 });
-export const dailyPriceLogs = pgTable("daily_price_logs", {
-    uid: uuid("uid").primaryKey().defaultRandom(),
+export const items = pgTable("items", {
+    id: integer("id").primaryKey(),
     name: text("name").notNull(),
+});
+export const granularPriceLogs = pgTable("granular_price_logs", {
+    uid: uuid("uid").primaryKey().defaultRandom(),
+    id: integer("id").notNull().references(() => items.id, { onDelete: "cascade" }),
     lastUpdate: timestamp("last_update").notNull(),
-    id: integer("id").notNull(),
-    volume: integer("volume").notNull().default(0),
+    avgHighPrice: integer("avg_high_price"),
+    highPriceVolume: integer("high_price_volume").notNull().default(0),
+    avgLowPrice: integer("avg_low_price"),
+    lowPriceVolume: integer("low_price_volume").notNull().default(0)
 });
 export const priceHist = pgTable("price_history", {
     uid: uuid("uid").primaryKey().defaultRandom(),
-    name: text("name").notNull().references(() => users.username),
+    name: text("name").notNull(),
     lastUpdate: timestamp("last_update").notNull(),
-    id: integer("id").notNull(),
+    id: integer("id").notNull().references(() => items.id, { onDelete: "cascade" }),
     volume: integer("volume").notNull(),
+    price: integer("price").notNull(),
 });
 export const meta = pgTable("metadata", {
     version: serial("version").primaryKey(),

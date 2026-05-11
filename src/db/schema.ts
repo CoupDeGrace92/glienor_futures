@@ -29,7 +29,7 @@ export const items = pgTable("items", {
 
 export type NewItems = typeof items.$inferInsert;
 
-export const granularPriceLogs = pgTable("daily_price_logs", {
+export const granularPriceLogs = pgTable("granular_price_logs", {
     uid: uuid("uid").primaryKey().defaultRandom(),
     id: integer("id").notNull().references(() => items.id, {onDelete: "cascade"}),
     lastUpdate: timestamp("last_update").notNull(),
@@ -39,7 +39,7 @@ export const granularPriceLogs = pgTable("daily_price_logs", {
     lowPriceVolume: integer("low_price_volume").notNull().default(0)
 });
 
-export type NewDailyPriceLogs = typeof granularPriceLogs.$inferInsert;
+export type NewGranularPriceLogs = typeof granularPriceLogs.$inferInsert;
 
 export const priceHist = pgTable("price_history", {
     uid: uuid("uid").primaryKey().defaultRandom(),

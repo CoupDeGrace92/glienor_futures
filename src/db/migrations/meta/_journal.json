@@ -15,6 +15,13 @@
       "when": 1778507214344,
       "tag": "0001_dazzling_night_thrasher",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778524972927,
+      "tag": "0002_powerful_radioactive_man",
+      "breakpoints": true
     }
   ]
 }

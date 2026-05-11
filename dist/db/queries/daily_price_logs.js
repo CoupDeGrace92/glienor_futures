@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { dailyPriceLogs } from "../schema.js";
+import { granularPriceLogs } from "../schema.js";
 /*
 export const dailyPriceLogs = pgTable("daily_price_logs", {
     uid: uuid("uid").primaryKey().defaultRandom(),
@@ -10,9 +10,10 @@ export const dailyPriceLogs = pgTable("daily_price_logs", {
 });
 */
 export async function InsertDailyData(d) {
-    await db.insert(dailyPriceLogs).values(d);
+    await db.insert(granularPriceLogs).values(d);
 }
 ;
 export async function ResetDailyDB() {
-    await db.delete(dailyPriceLogs);
+    await db.delete(granularPriceLogs);
 }
+;

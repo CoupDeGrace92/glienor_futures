@@ -1,4 +1,5 @@
 import { URL } from "node:url";
+import { getIDFromName } from "../db/queries/items.js";
 
 ///Wierd Gloop Price data - dump from Jagex once per day
 export type WGMarketUpdateTime = {
@@ -63,7 +64,7 @@ export class WGMarketClient {
     };
 
     async getItemLatest(name: string): Promise<MarketResponse> {
-        return this.fetchJSON<MarketResponse>("/exchange/history/osrs/latest", {name: name})
+        return this.fetchJSON<MarketResponse>("/exchange/history/osrs/latest", {"name": name})
     };
 
     async getAllItems(): Promise<WGDumpData> {
@@ -91,7 +92,7 @@ export class MarketClient {
     private userAgent: string;
 
     constructor(userAgent: string) {
-        this.baseURL = "https://prices.runescape.wiki/api/v1/osrs";
+        this.baseURL = "https://prices.runescape.wiki/api/v1/osrs/";
         this.userAgent = userAgent;
     };
 
@@ -123,4 +124,35 @@ export class MarketClient {
             throw err;
         }
     }
+
+    async getItemLatest(name: string): Promise<MarketData> {
+        const id = await getIDFromName(name) //possible improvement to store name/id table in local mem
+        return await this.fetchJSON<MarketData>("latest", {"id": id.toString()})
+    }
+
+    async getAllItems(): Promise<MarketData> {
+        return await this.fetchJSON<MarketData>("5m")
+    }
+
+    async bootstrapItems(): Promise<ItemName[]> {
+        return await this.fetchJSON<ItemName[]>("mapping")
+    }
+
+};
+
+export type MarketData = {
+    data: Record<number, ItemData>,
+    timestamp: number, //This comes in as a UNIX timestamp - we convert it to ISO elsewhere
+};
+
+export type ItemData = {
+    avgHighPrice: number | null,
+    highPriceVolume: number,
+    avgLowPrice: number | null,
+    lowPriceVolume: number,
+};
+
+export type ItemName = {
+    id: number,
+    name: string
 }
