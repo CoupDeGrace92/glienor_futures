@@ -57,7 +57,7 @@ export const meta = pgTable("metadata", {
     lastLogUpdate: timestamp("last_log_update"),
     lastHistUpdate: timestamp("last_hist_update"),
     lastSyncStatus: varchar("last_sync_status"),
-    lastSyncError: text("last_sync_error"),
+    lastSyncError: text("last_sync_error").default("none"),
     itemsProcessed: integer("items_processed"),
     lastSyncDuration: integer("last_sync_duration_ms"),
 });

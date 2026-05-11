@@ -44,6 +44,8 @@ await fastChunkedGranularInsert(granularData, updateTimestamp)
 console.log(`[${new Date()}] - Done inserting data`)
 
 
+
+
 async function fastChunkedGranularInsert(rawDump: MarketData, timestamp: Date) {
     const chunkSize = 1000;
     let currentChunk = []

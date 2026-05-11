@@ -11,7 +11,7 @@ app.use(middlewareLogesponse);
 app.use(express.json());
 app.get("/api/health", HandlerReadiness);
 app.post("/admin/users/reset", HandlerResetUsers);
-app.post("/admin/daily_logs/reset", HandlerResetDaily);
+app.post("/admin/granular_logs/reset", HandlerResetDaily);
 app.post("/api/users", HandlerCreateUser);
 app.post("/api/login", HandlerLogin);
 app.post("api/refresh", HandlerRefresh);
@@ -90,7 +90,7 @@ async function HandlerResetDaily(req, resp) {
     if (config.api.platform !== "dev") {
         throw new ForbiddenError("Can not perform reset action");
     }
-    await ResetDailyDB;
+    await ResetDailyDB();
     resp.status(200).send("Daily db reset");
 }
 async function HandlerRefresh(req, resp) {
