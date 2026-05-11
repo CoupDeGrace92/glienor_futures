@@ -20,7 +20,7 @@ export const dailyPriceLogs = pgTable("daily_price_logs", {
     name: text("name").notNull(),
     lastUpdate: timestamp("last_update").notNull(),
     id: integer("id").notNull(),
-    volume: integer("volume").notNull(),
+    volume: integer("volume").notNull().default(0),
 });
 export const priceHist = pgTable("price_history", {
     uid: uuid("uid").primaryKey().defaultRandom(),

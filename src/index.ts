@@ -1,4 +1,4 @@
-import express from "express";
+import express, { application } from "express";
 import { Request, Response, NextFunction } from "express";
 import { config } from "./config.js"
 import {
@@ -29,6 +29,8 @@ import {
     GetAuthToken,
     ValidateJWT,
 } from "./auth.js";
+import { db } from "./db/index.js";
+import { ResetDailyDB } from "./db/queries/daily_price_logs.js";
 
 
 const app = express();
@@ -38,11 +40,14 @@ app.use(middlewareLogesponse);
 app.use(express.json());
 
 app.get("/api/health", HandlerReadiness);
-app.post("/admin/reset", HandlerReset);
+app.post("/admin/users/reset", HandlerResetUsers);
+app.post("/admin/daily_logs/reset", HandlerResetDaily);
 app.post("/api/users", HandlerCreateUser);
 app.post("/api/login", HandlerLogin);
 app.post("api/refresh", HandlerRefresh);
 app.put("/api/users", HandlerUpdateUser);
+
+
 
 app.use(ErrorHandler);
 
@@ -67,13 +72,13 @@ function HandlerReadiness(req: Request, resp: Response) {
     resp.send("OK")
 }
 
-async function HandlerReset(req: Request, resp: Response) {
+async function HandlerResetUsers(req: Request, resp: Response) {
     resp.set("Content-Type", "text/plain; charset=utf8");
     if (config.api.platform !== "dev") {
         throw new ForbiddenError("Reset forbidden");
     };
     await ResetUsers();
-    resp.send(`User DB reset`);
+    resp.status(200).send(`User DB reset`);
 }
 
 async function HandlerCreateUser(req: Request, resp: Response) {
@@ -136,8 +141,16 @@ async function HandlerLogin(req: Request, resp: Response) {
     };
 
     resp.status(200).send(response);
-}
+};
 
+async function HandlerResetDaily(req: Request, resp: Response) {
+    resp.set("Content-Type", "text/plain; charset=utf-8");
+    if (config.api.platform !== "dev") {
+        throw new ForbiddenError("Can not perform reset action");
+    }
+    await ResetDailyDB;
+    resp.status(200).send("Daily db reset")
+}
 
 async function HandlerRefresh(req: Request, resp: Response) {
     resp.set("Content-Type", "application/json");
@@ -148,7 +161,7 @@ async function HandlerRefresh(req: Request, resp: Response) {
     };
     const jwt = MakeJWT(refTokenObj.username, 3600, config.api.jwtSecret);
     resp.status(200).send({token: jwt});
-}
+};
 
 async function HandlerUpdateUser(req: Request, resp: Response) {
     resp.set("Content-Type", "application/json");
@@ -165,7 +178,7 @@ async function HandlerUpdateUser(req: Request, resp: Response) {
     const pHash = await HashPassword(params.password);
     const user = await UpdateUser(params.email, pHash, username);
     resp.status(200).send(user);
-}
+};
 
 //MIDDLEWARE
 function middlewareLogesponse(req: Request, resp: Response, next: NextFunction) {
@@ -174,4 +187,5 @@ function middlewareLogesponse(req: Request, resp: Response, next: NextFunction) 
             console.log(`[NON-OK] ${req.method} ${req.path} - Status: ${resp.statusCode}`);
         };
     });
+    next();
 };

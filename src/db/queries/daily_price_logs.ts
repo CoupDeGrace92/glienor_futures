@@ -1,5 +1,5 @@
 import { db } from "../index.js";
-import { NewDailyPriceLogs, dailyPriceLogs } from "../schema.js";
+import { NewDailyPriceLogs, granularPriceLogs } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 /*
@@ -13,5 +13,9 @@ export const dailyPriceLogs = pgTable("daily_price_logs", {
 */
 
 export async function InsertDailyData(d: NewDailyPriceLogs[]) {
-    await db.insert(dailyPriceLogs).values(d)
+    await db.insert(granularPriceLogs).values(d)
 };
+
+export async function ResetDailyDB() {
+    await db.delete(granularPriceLogs);
+}

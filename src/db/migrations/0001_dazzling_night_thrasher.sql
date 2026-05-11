@@ -1,0 +1,1 @@
+ALTER TABLE "daily_price_logs" ALTER COLUMN "volume" SET DEFAULT 0;

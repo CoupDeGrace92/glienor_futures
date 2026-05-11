@@ -1,23 +1,26 @@
-export type MarketUpdateTime = {
+import { URL } from "node:url";
+
+///Wierd Gloop Price data - dump from Jagex once per day
+export type WGMarketUpdateTime = {
     rs: string
     osrs: string
 };
 
-export type MarketError = {
+export type WGMarketError = {
     success: boolean
     error: string
 }
 
-export type MarketData = {
+export type WGMarketData = {
     id: string
     timestamp: string
     price: number
     volume: number
 }
 
-export type MarketResponse = MarketData | MarketError;
+export type MarketResponse = WGMarketData | WGMarketError;
 
-export class MarketClient {
+export class WGMarketClient {
     private baseUrl: string;
     private userAgent: string;
 
@@ -55,22 +58,22 @@ export class MarketClient {
         }
     }
 
-    async getLastUpdate(): Promise<MarketUpdateTime> {
-        return this.fetchJSON<MarketUpdateTime>("/exchange");
+    async getLastUpdate(): Promise<WGMarketUpdateTime> {
+        return this.fetchJSON<WGMarketUpdateTime>("/exchange");
     };
 
     async getItemLatest(name: string): Promise<MarketResponse> {
         return this.fetchJSON<MarketResponse>("/exchange/history/osrs/latest", {name: name})
     };
 
-    async getAllItems(): Promise<DumpData> {
+    async getAllItems(): Promise<WGDumpData> {
         return this.fetchJSON<any>("https://chisel.weirdgloop.org/gazproj/gazbot/os_dump.json");
     };
 };
 
-export type DumpData = Record<string, DumpInfo | number> | MarketError;
+export type WGDumpData = Record<string, WGDumpInfo | number> | WGMarketError;
 
-export type DumpInfo = {
+export type WGDumpInfo = {
     name: string,
     examine: string,
     id: number,
@@ -80,3 +83,44 @@ export type DumpInfo = {
     last: number,
     volume: number,
 };
+
+
+///RuneLite / OSRS Wiki Real-Time price data
+export class MarketClient {
+    private baseURL: string;
+    private userAgent: string;
+
+    constructor(userAgent: string) {
+        this.baseURL = "https://prices.runescape.wiki/api/v1/osrs";
+        this.userAgent = userAgent;
+    };
+
+    private async fetchJSON<T>(path: string, queries?: Record<string, string>): Promise<T> {
+        const url = path.startsWith("http")
+            ? new URL(path)
+            : new URL(path, this.baseURL);
+
+        if (queries) {
+            for (const [key, value] of Object.entries(queries)) {
+                url.searchParams.append(key,value)
+            }
+        }
+
+        try {
+            const response = await fetch(url.toString(), {
+                headers: {"User-Agent": this.userAgent},
+                method: "GET"
+            })
+
+            if (!response.ok) {
+                throw new Error(`Response status not ok: ${response.status}`);
+            }
+
+            return await response.json() as T
+
+        } catch (err) {
+            console.error(`Request to ${url.pathname} failed:`, err);
+            throw err;
+        }
+    }
+}

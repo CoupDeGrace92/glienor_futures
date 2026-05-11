@@ -13,3 +13,6 @@ export async function InsertDailyData(d) {
     await db.insert(dailyPriceLogs).values(d);
 }
 ;
+export async function ResetDailyDB() {
+    await db.delete(dailyPriceLogs);
+}
