@@ -7,3 +7,17 @@ export async function GetLastUpdateTimestamp() {
         .from(meta);
     return result;
 };
+
+export async function GetGranularUpdate() {
+    const [result] = await db
+        .select({timestamp: meta.lastHistUpdate})
+        .from(meta);
+    return result;
+};
+
+export async function GetHistoricUpdate() {
+    const [result] = await db
+        .select({timestamp: meta.lastGranularUpdate})
+        .from(meta);
+    return result;
+};

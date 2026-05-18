@@ -43,7 +43,6 @@ export type NewGranularPriceLogs = typeof granularPriceLogs.$inferInsert;
 
 export const priceHist = pgTable("price_history", {
     uid: uuid("uid").primaryKey().defaultRandom(),
-    name: text("name").notNull(),
     lastUpdate: timestamp("last_update").notNull(),
     id: integer("id").notNull().references(() => items.id, {onDelete: "cascade"}),
     volume: integer("volume").notNull(),
@@ -56,6 +55,7 @@ export const meta = pgTable("metadata", {
     version: serial("version").primaryKey(),
     lastLogUpdate: timestamp("last_log_update"),
     lastHistUpdate: timestamp("last_hist_update"),
+    lastGranularUpdate: timestamp("last_granular_update"),
     lastSyncStatus: varchar("last_sync_status"),
     lastSyncError: text("last_sync_error").default("none"),
     itemsProcessed: integer("items_processed"),

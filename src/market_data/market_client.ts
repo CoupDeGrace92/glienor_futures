@@ -19,7 +19,7 @@ export type WGMarketData = {
     volume: number
 }
 
-export type MarketResponse = WGMarketData | WGMarketError;
+export type MarketResponse = Record<string, WGMarketData | number> | WGMarketError;
 
 export class WGMarketClient {
     private baseUrl: string;
@@ -90,10 +90,14 @@ export type WGDumpInfo = {
 export class MarketClient {
     private baseURL: string;
     private userAgent: string;
+    private updateGranular: Date;
+    private updateHistoric: Date;
 
-    constructor(userAgent: string) {
+    constructor(userAgent: string, granularDate: Date, historicDate: Date) {
         this.baseURL = "https://prices.runescape.wiki/api/v1/osrs/";
         this.userAgent = userAgent;
+        this.updateGranular = granularDate;
+        this.updateHistoric = historicDate;
     };
 
     private async fetchJSON<T>(path: string, queries?: Record<string, string>): Promise<T> {
@@ -134,8 +138,24 @@ export class MarketClient {
         return await this.fetchJSON<MarketData>("5m")
     }
 
+    async getItemHist(): Promise<MarketResponse> {
+        return await this.fetchJSON<MarketResponse>("https://chisel.weirdgloop.org/gazproj/gazbot/rs_dump.json")
+    }
+
     async bootstrapItems(): Promise<ItemName[]> {
         return await this.fetchJSON<ItemName[]>("mapping")
+    }
+
+    getUpdateTimes(): {granular: Date, historic: Date} {
+        return {granular: this.updateGranular, historic: this.updateHistoric}
+    };
+
+    setGranularUpdate(newDate: Date) {
+        this.updateGranular = newDate
+    }
+
+    setHistoricUpdate(newDate: Date) {
+        this.updateHistoric = newDate
     }
 
 };
@@ -155,4 +175,5 @@ export type ItemData = {
 export type ItemName = {
     id: number,
     name: string
-}
+};
+
