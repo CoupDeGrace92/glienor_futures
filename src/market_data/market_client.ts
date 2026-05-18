@@ -92,12 +92,16 @@ export class MarketClient {
     private userAgent: string;
     private updateGranular: Date;
     private updateHistoric: Date;
+    private scheduledGranular: Date;
+    private scheduledHistoric: Date;
 
-    constructor(userAgent: string, granularDate: Date, historicDate: Date) {
+    constructor(userAgent: string, granularDate: Date, historicDate: Date, scheduledGranular: Date, scheduledHist: Date) {
         this.baseURL = "https://prices.runescape.wiki/api/v1/osrs/";
         this.userAgent = userAgent;
         this.updateGranular = granularDate;
         this.updateHistoric = historicDate;
+        this.scheduledGranular = scheduledGranular;
+        this.scheduledHistoric = scheduledHist;
     };
 
     private async fetchJSON<T>(path: string, queries?: Record<string, string>): Promise<T> {
@@ -130,34 +134,45 @@ export class MarketClient {
     }
 
     async getItemLatest(name: string): Promise<MarketData> {
-        const id = await getIDFromName(name) //possible improvement to store name/id table in local mem
-        return await this.fetchJSON<MarketData>("latest", {"id": id.toString()})
-    }
+        const id = await getIDFromName(name); //possible improvement to store name/id table in local mem
+        return await this.fetchJSON<MarketData>("latest", {"id": id.toString()});
+    };
 
     async getAllItems(): Promise<MarketData> {
-        return await this.fetchJSON<MarketData>("5m")
-    }
+        return await this.fetchJSON<MarketData>("5m");
+    };
 
     async getItemHist(): Promise<MarketResponse> {
-        return await this.fetchJSON<MarketResponse>("https://chisel.weirdgloop.org/gazproj/gazbot/rs_dump.json")
-    }
+        return await this.fetchJSON<MarketResponse>("https://chisel.weirdgloop.org/gazproj/gazbot/rs_dump.json");
+    };
 
     async bootstrapItems(): Promise<ItemName[]> {
-        return await this.fetchJSON<ItemName[]>("mapping")
-    }
+        return await this.fetchJSON<ItemName[]>("mapping");
+    };
+
+    getScheduledUpdateTimes(): {granular: Date, historic: Date} {
+        return {granular: this.scheduledGranular, historic: this.scheduledHistoric};
+    };
 
     getUpdateTimes(): {granular: Date, historic: Date} {
         return {granular: this.updateGranular, historic: this.updateHistoric}
     };
 
     setGranularUpdate(newDate: Date) {
-        this.updateGranular = newDate
-    }
+        this.updateGranular = newDate;
+    };
 
     setHistoricUpdate(newDate: Date) {
-        this.updateHistoric = newDate
-    }
+        this.updateHistoric = newDate;
+    };
 
+    setScheduleGranular(newDate: Date) {
+        this.scheduledGranular = newDate;
+    };
+
+    setScheduleHist(newDate: Date) {
+        this.scheduledHistoric = newDate;
+    };
 };
 
 export type MarketData = {

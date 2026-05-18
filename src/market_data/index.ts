@@ -27,6 +27,9 @@ import { GetGranularUpdate, GetHistoricUpdate, GetLastUpdateTimestamp } from "..
 //Granular data stuff:
 let granularUpdate: Date;
 let historicalUpdate: Date;
+let scheduledGranular: Date;
+let scheduledHistoric: Date;
+
 const FIVE_MINUTES_MS = 5 * 60000;
 const ONE_DAY_MS = 24*60*60000;
 
@@ -37,24 +40,32 @@ try {
     ]);
     if (rawGranular.timestamp == null) {
         granularUpdate = new Date()
+        scheduledGranular = new Date()
     } else {
-        granularUpdate = new Date(rawGranular.timestamp.getTime() + FIVE_MINUTES_MS)
+        granularUpdate = rawGranular.timestamp
+        scheduledGranular = new Date(rawGranular.timestamp.getTime() + FIVE_MINUTES_MS)
     }
     if (rawHist.timestamp == null) {
         historicalUpdate = new Date()
+        scheduledHistoric = new Date()
     } else {
-        historicalUpdate = new Date(rawHist.timestamp.getTime()+ONE_DAY_MS)
+        historicalUpdate = rawHist.timestamp
+        scheduledHistoric = new Date(rawHist.timestamp.getTime()+ONE_DAY_MS)
     }
 } catch {
     console.error(`Error fetching data from metadata table - starting data collection from now: ${new Date()}`)
     granularUpdate = new Date();
     historicalUpdate = new Date();
+    scheduledGranular = new Date();
+    scheduledHistoric = new Date();
 }
 
 const MClient = new MarketClient(
     "gleinor_futures - @coupdegrace09214, github: https://github.com/CoupDeGrace92/glienor_futures",
     granularUpdate,
-    historicalUpdate
+    historicalUpdate,
+    scheduledGranular,
+    scheduledHistoric
 )
 
 let running = true;
@@ -64,18 +75,38 @@ process.on("SIGINT", () => {
 })
 
 while (running) {
-    const {granular, historic } = MClient.getUpdateTimes();
+    const {granular, historic } = MClient.getScheduledUpdateTimes();
     await sleepUntil(new Date(Math.min(granular.getDate(), historic.getDate())));
     try{
         if (granular <= new Date()) {
-            await populateGranular(MClient)
+            try {
+                await populateGranular(MClient)
+                MClient.setScheduleGranular(new Date(granular.getTime()+FIVE_MINUTES_MS))
+            } catch (err) {
+                console.error("Error populating granulated data: ", err)
+                MClient.setScheduleGranular(new Date(granular.getTime()+30000))
+            }
         }
         if (historic <= new Date()) {
-            await populateHistoric(MClient)
+            try{
+                await populateHistoric(MClient)
+                MClient.setScheduleHist(new Date(historic.getTime()+ONE_DAY_MS))
+            } catch (err) {
+                console.error("Error populating historic data: ", err)
+                MClient.setScheduleHist(new Date(historic.getTime()+30000))
+            }
         }
     } catch (err) {
         console.error("Error fetching data: ", err)
         //Add some time before trying to fetch again - probably want more complex handling logic here
+        if (granular === historic) {
+            MClient.setScheduleGranular(new Date(granular.getTime()+30000))
+            MClient.setScheduleHist(new Date(historic.getTime()+30000))
+        } else if (granular < historic) {
+            MClient.setScheduleGranular(new Date(granular.getTime() + 30000))
+        } else {
+            MClient.setScheduleHist(new Date(historic.getTime()+30000))
+        }
     }
 }
 
